@@ -22,7 +22,19 @@ const PORT = process.env.PORT || 8800;
 dbConnection();
 
 app.use(express.static("./views"));
-app.use(helmet());
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
+        styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+        fontSrc: ["'self'", "https://fonts.gstatic.com"],
+        imgSrc: ["'self'", "https://res.cloudinary.com/"],
+      },
+    },
+  })
+);
 app.use(cors());
 app.use(bodyParser.json());
 
@@ -37,12 +49,12 @@ app.use(router);
 app.use(errorMiddleware);
 
 // Serve static files
-// app.use(express.static(path.join(__dirname, "./client/build")));
+app.use(express.static(path.join(__dirname, "./client/build")));
 
-// // Handle all remaining routes by serving the index.html file
-// app.get("*", function (req, res) {
-//   res.sendFile(path.join(__dirname, "./client/build/index.html"));
-// });
+// Handle all remaining routes by serving the index.html file
+app.get("*", function (req, res) {
+  res.sendFile(path.join(__dirname, "./client/build/index.html"));
+});
 
 app.listen(PORT, () => {
   console.log(`running on the port ${PORT}`);
